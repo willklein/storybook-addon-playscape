@@ -1,4 +1,4 @@
-import { BackIcon } from '@storybook/icons';
+import { BackIcon, RefreshIcon } from '@storybook/icons';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { IconButton } from 'storybook/internal/components';
 import { styled } from 'storybook/theming';
@@ -148,6 +148,14 @@ export const ForkEditor: React.FC<ForkEditorProps> = ({ storyId, fork, onBack, o
     if (win) postToFrame(win, EVENTS.SET_SOURCE, { storyId, forkId, source: nextSource });
   };
 
+  const handleReload = () => {
+    // Some props only affect a component's initial state (e.g. useState(props.foo)), so editing
+    // them doesn't visibly update on an already-mounted component. A full iframe reload forces a
+    // fresh mount; the existing STORY_READY handshake then reapplies the current source once the
+    // preview's channel is live again.
+    iframeRef.current?.contentWindow?.location.reload();
+  };
+
   const handleDividerMouseDown = (event: React.MouseEvent) => {
     event.preventDefault();
     dragStartRef.current = { startY: event.clientY, startHeight: previewHeight };
@@ -231,6 +239,9 @@ export const ForkEditor: React.FC<ForkEditorProps> = ({ storyId, fork, onBack, o
       <Toolbar>
         <IconButton onClick={onBack} title="Back to forks">
           <BackIcon />
+        </IconButton>
+        <IconButton onClick={handleReload} title="Reload preview" disabled={!created}>
+          <RefreshIcon />
         </IconButton>
         <NameInput
           value={name}
