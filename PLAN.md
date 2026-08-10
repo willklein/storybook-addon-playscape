@@ -35,6 +35,10 @@ Terminology: keeping **"fork"** as-is (considered renaming to "playscape", decid
   - Finding whether Storybook exposes any per-tab "full bleed" option.
 - Explicitly **not** doing yet: combining list + detail into one view (e.g. list on the left, editor on the right). Both stay as separate full-page views within the tab, each now full width.
 
+### 1.4 Reload fork preview
+
+- Sometimes we modify props that only affect the initial state of the component. Let's add a reload button to the header (back button, fork name, create/modify dates).
+
 ---
 
 ## Phase 2 — Sharing a fork via URL
@@ -59,7 +63,7 @@ Terminology: keeping **"fork"** as-is (considered renaming to "playscape", decid
 
 1. [PlayscapeTab.tsx](src/components/PlayscapeTab.tsx) checks `window.location.search` for `loadPlayscape` on mount (and whenever the current story changes, in case the addon is already open when a shared link is followed within the same session).
 2. If present: base64-decode + JSON-parse back to `{ name, source }`.
-3. Check existing forks for *this story* for a name collision:
+3. Check existing forks for _this story_ for a name collision:
    - If `name` is free, use it as-is.
    - If taken, append the first available `" (2)"`, `" (3)"`, … suffix — same idea as the existing "New Fork" auto-naming ([storage.ts](src/lib/storage.ts) `nextForkName`), just applied to the incoming shared name instead of the literal `"Fork N"` pattern.
 4. Create a new fork (`isDefault: false`) with the resolved name + source.

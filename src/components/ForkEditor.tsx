@@ -16,6 +16,11 @@ interface ForkEditorProps {
   onUpdated: () => void;
 }
 
+const DEFAULT_PREVIEW_HEIGHT = 280;
+const MIN_PREVIEW_HEIGHT = 80;
+const MIN_EDITOR_HEIGHT = 100;
+const DIVIDER_HEIGHT = 7;
+
 const Wrapper = styled.div({
   display: 'flex',
   flexDirection: 'column',
@@ -51,13 +56,36 @@ const Dates = styled.div(({ theme }) => ({
   whiteSpace: 'nowrap',
 }));
 
+const Content = styled.div({
+  display: 'flex',
+  flexDirection: 'column',
+  flex: 1,
+  minHeight: 0,
+});
+
 const PreviewFrame = styled.iframe(({ theme }) => ({
   width: '100%',
-  height: 280,
+  flexShrink: 0,
   border: 'none',
-  borderBottom: `1px solid ${theme.appBorderColor}`,
   background: theme.background.content,
 }));
+
+const Divider = styled.div(({ theme }) => ({
+  flexShrink: 0,
+  height: DIVIDER_HEIGHT,
+  cursor: 'row-resize',
+  background: theme.appBorderColor,
+  '&:hover': {
+    background: theme.color.secondary,
+  },
+}));
+
+const DragOverlay = styled.div({
+  position: 'fixed',
+  inset: 0,
+  zIndex: 9999,
+  cursor: 'row-resize',
+});
 
 const ErrorBanner = styled.div({
   padding: '8px 16px',
@@ -70,6 +98,7 @@ const ErrorBanner = styled.div({
 
 const Editor = styled.textarea(({ theme }) => ({
   flex: 1,
+  minHeight: MIN_EDITOR_HEIGHT,
   border: 'none',
   outline: 'none',
   resize: 'none',
@@ -91,10 +120,15 @@ export const ForkEditor: React.FC<ForkEditorProps> = ({ storyId, fork, onBack, o
   const [status, setStatus] = useState<RenderStatusEvent | null>(null);
   const [created, setCreated] = useState<PlayscapeFork | null>(fork);
 
+  const [previewHeight, setPreviewHeight] = useState(DEFAULT_PREVIEW_HEIGHT);
+  const [dragging, setDragging] = useState(false);
+
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const createdRef = useRef<PlayscapeFork | null>(fork);
   const sourceRef = useRef(source);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const dragStartRef = useRef<{ startY: number; startHeight: number } | null>(null);
 
   useEffect(() => {
     createdRef.current = created;
@@ -112,6 +146,26 @@ export const ForkEditor: React.FC<ForkEditorProps> = ({ storyId, fork, onBack, o
   const sendSource = (forkId: string, nextSource: string) => {
     const win = iframeRef.current?.contentWindow;
     if (win) postToFrame(win, EVENTS.SET_SOURCE, { storyId, forkId, source: nextSource });
+  };
+
+  const handleDividerMouseDown = (event: React.MouseEvent) => {
+    event.preventDefault();
+    dragStartRef.current = { startY: event.clientY, startHeight: previewHeight };
+    setDragging(true);
+  };
+
+  const handleOverlayMouseMove = (event: React.MouseEvent) => {
+    if (!dragStartRef.current) return;
+    const delta = event.clientY - dragStartRef.current.startY;
+    const contentHeight = contentRef.current?.clientHeight ?? Infinity;
+    const maxHeight = Math.max(MIN_PREVIEW_HEIGHT, contentHeight - MIN_EDITOR_HEIGHT - DIVIDER_HEIGHT);
+    const next = Math.min(Math.max(dragStartRef.current.startHeight + delta, MIN_PREVIEW_HEIGHT), maxHeight);
+    setPreviewHeight(next);
+  };
+
+  const handleOverlayMouseUp = () => {
+    dragStartRef.current = null;
+    setDragging(false);
   };
 
   useEffect(() => {
@@ -192,16 +246,28 @@ export const ForkEditor: React.FC<ForkEditorProps> = ({ storyId, fork, onBack, o
         ) : null}
       </Toolbar>
 
-      <PreviewFrame ref={iframeRef} title="Playscape preview" src={iframeSrc} />
+      <Content ref={contentRef}>
+        <PreviewFrame ref={iframeRef} title="Playscape preview" src={iframeSrc} style={{ height: previewHeight }} />
 
-      {status?.status === 'error' ? <ErrorBanner>{status.message}</ErrorBanner> : null}
+        <Divider onMouseDown={handleDividerMouseDown} />
 
-      <Editor
-        value={source}
-        onChange={(event) => handleSourceChange(event.target.value)}
-        spellCheck={false}
-        placeholder="Waiting for the story to load..."
-      />
+        {status?.status === 'error' ? <ErrorBanner>{status.message}</ErrorBanner> : null}
+
+        <Editor
+          value={source}
+          onChange={(event) => handleSourceChange(event.target.value)}
+          spellCheck={false}
+          placeholder="Waiting for the story to load..."
+        />
+      </Content>
+
+      {dragging ? (
+        <DragOverlay
+          onMouseMove={handleOverlayMouseMove}
+          onMouseUp={handleOverlayMouseUp}
+          onMouseLeave={handleOverlayMouseUp}
+        />
+      ) : null}
     </Wrapper>
   );
 };
