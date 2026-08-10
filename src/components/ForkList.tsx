@@ -94,17 +94,15 @@ export const ForkList: React.FC<ForkListProps> = ({ forks, onOpenDefault, onOpen
           </Name>
           <Meta>Created {formatDate(fork.createdAt)}</Meta>
           <Meta>Edited {formatDate(fork.updatedAt)}</Meta>
-          {!fork.isDefault ? (
-            <IconButton
-              title="Delete fork"
-              onClick={(event) => {
-                event.stopPropagation();
-                onDelete(fork.id);
-              }}
-            >
-              <TrashIcon />
-            </IconButton>
-          ) : null}
+          <IconButton
+            title="Delete fork"
+            onClick={(event) => {
+              event.stopPropagation();
+              onDelete(fork.id);
+            }}
+          >
+            <TrashIcon />
+          </IconButton>
         </Row>
       ))}
     </div>
