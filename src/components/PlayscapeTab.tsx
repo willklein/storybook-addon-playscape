@@ -15,6 +15,7 @@ type View = { type: 'list' } | { type: 'default' } | { type: 'fork'; forkId: str
 
 const Wrapper = styled.div(({ theme }) => ({
   background: theme.background.content,
+  width: '100%',
   height: '100%',
   boxSizing: 'border-box',
 }));
