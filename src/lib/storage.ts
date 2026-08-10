@@ -51,3 +51,11 @@ export function nextForkName(storyId: string): string {
   while (existing.has(`Fork ${n}`)) n += 1;
   return `Fork ${n}`;
 }
+
+export function resolveUniqueName(storyId: string, desiredName: string): string {
+  const existing = new Set(getForksForStory(storyId).map((fork) => fork.name));
+  if (!existing.has(desiredName)) return desiredName;
+  let n = 2;
+  while (existing.has(`${desiredName} (${n})`)) n += 1;
+  return `${desiredName} (${n})`;
+}

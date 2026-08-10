@@ -1,10 +1,11 @@
-import { BackIcon, RefreshIcon } from '@storybook/icons';
+import { BackIcon, CheckIcon, RefreshIcon, ShareIcon } from '@storybook/icons';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { IconButton } from 'storybook/internal/components';
 import { styled } from 'storybook/theming';
 
-import { DEFAULT_FORK_NAME, EVENTS } from '../constants';
+import { DEFAULT_FORK_NAME, EVENTS, SHARE_PARAM, TAB_ID } from '../constants';
 import { listenFromFrame, postToFrame } from '../lib/directChannel';
+import { encodeShareToken } from '../lib/shareToken';
 import { createFork, updateFork } from '../lib/storage';
 import type { PlayscapeFork, RenderStatusEvent, StoryReadyEvent } from '../types';
 
@@ -122,6 +123,7 @@ export const ForkEditor: React.FC<ForkEditorProps> = ({ storyId, fork, onBack, o
 
   const [previewHeight, setPreviewHeight] = useState(DEFAULT_PREVIEW_HEIGHT);
   const [dragging, setDragging] = useState(false);
+  const [shared, setShared] = useState(false);
 
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -234,6 +236,23 @@ export const ForkEditor: React.FC<ForkEditorProps> = ({ storyId, fork, onBack, o
     onUpdated();
   };
 
+  const handleShare = async () => {
+    if (!created) return;
+    const token = encodeShareToken({ id: created.id, name: name.trim() || DEFAULT_FORK_NAME, source });
+    const url = new URL(window.location.href);
+    url.searchParams.set('tab', TAB_ID);
+    url.searchParams.set(SHARE_PARAM, token);
+
+    try {
+      await navigator.clipboard.writeText(url.toString());
+      setShared(true);
+      setTimeout(() => setShared(false), 1500);
+    } catch {
+      // Clipboard access can be denied (e.g. insecure context, permissions) — nothing more we
+      // can do here short of a fallback UI, which isn't worth the complexity for now.
+    }
+  };
+
   return (
     <Wrapper>
       <Toolbar>
@@ -255,6 +274,9 @@ export const ForkEditor: React.FC<ForkEditorProps> = ({ storyId, fork, onBack, o
             Created {formatDate(created.createdAt)} · Edited {formatDate(created.updatedAt)}
           </Dates>
         ) : null}
+        <IconButton onClick={handleShare} title="Copy shareable link" disabled={!created}>
+          {shared ? <CheckIcon /> : <ShareIcon />}
+        </IconButton>
       </Toolbar>
 
       <Content ref={contentRef}>

@@ -2,7 +2,9 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useStorybookState } from 'storybook/manager-api';
 import { styled } from 'storybook/theming';
 
-import { createFork, deleteFork, getForksForStory, nextForkName } from '../lib/storage';
+import { SHARE_PARAM } from '../constants';
+import { createFork, deleteFork, getForksForStory, nextForkName, resolveUniqueName } from '../lib/storage';
+import { decodeShareToken, stripShareParam } from '../lib/shareToken';
 import type { PlayscapeFork } from '../types';
 import { ForkEditor } from './ForkEditor';
 import { ForkList } from './ForkList';
@@ -26,7 +28,38 @@ export const PlayscapeTab: React.FC<PlayscapeTabProps> = ({ active }) => {
   const [view, setView] = useState<View>({ type: 'list' });
 
   useEffect(() => {
-    setForks(storyId ? getForksForStory(storyId) : []);
+    if (!storyId) {
+      setForks([]);
+      setView({ type: 'list' });
+      return;
+    }
+
+    const token = new URLSearchParams(window.location.search).get(SHARE_PARAM);
+    if (token) {
+      const payload = decodeShareToken(token);
+      // Best-effort cleanup — Storybook's own router can resync the URL and resurrect this
+      // param afterwards, so don't rely on it staying gone. The `id` reuse below is what
+      // actually keeps re-processing the same token idempotent.
+      stripShareParam(SHARE_PARAM);
+
+      if (payload) {
+        const existing = getForksForStory(storyId).find((fork) => fork.id === payload.id);
+        const target =
+          existing ??
+          createFork({
+            id: payload.id,
+            storyId,
+            name: resolveUniqueName(storyId, payload.name),
+            source: payload.source,
+            isDefault: false,
+          });
+        setForks(getForksForStory(storyId));
+        setView({ type: 'fork', forkId: target.id });
+        return;
+      }
+    }
+
+    setForks(getForksForStory(storyId));
     setView({ type: 'list' });
   }, [storyId]);
 

@@ -5,6 +5,9 @@ export const STORAGE_KEY = 'storybook-addon-playscape:forks';
 
 export const DEFAULT_FORK_NAME = 'Default';
 
+// URL query param used to share a fork: base64url-encoded { name, source } JSON.
+export const SHARE_PARAM = 'loadPlayscape';
+
 export const EVENTS = {
   // manager -> preview: override the story's render with the given source
   SET_SOURCE: `${ADDON_ID}/set-source`,
