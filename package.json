@@ -1,6 +1,6 @@
 {
   "name": "storybook-addon-playscape",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A Storybook addon for locally editing, saving, and sharing stories",
   "keywords": [
     "storybook-addon",
