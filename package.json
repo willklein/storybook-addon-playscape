@@ -1,9 +1,12 @@
 {
   "name": "storybook-addon-playscape",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "A Storybook addon for locally editing, saving, and sharing stories",
   "keywords": [
-    "storybook-addon"
+    "storybook-addon",
+    "storybook-addons",
+    "playground",
+    "sandbox"
   ],
   "repository": {
     "type": "git",
@@ -99,7 +102,7 @@
     "supportedFrameworks": [
       "React"
     ],
-    "icon": "https://user-images.githubusercontent.com/321738/63501763-88dbf600-c4cc-11e9-96cd-94adadc2fd72.png"
+    "icon": "https://www.willklein.co/playscape-logo.png"
   },
   "packageManager": "pnpm@10.22.0+sha512.bf049efe995b28f527fd2b41ae0474ce29186f7edcb3bf545087bd61fbbebb2bf75362d1307fda09c2d288e1e499787ac12d4fcb617a974718a6051f2eee741c",
   "dependencies": {
