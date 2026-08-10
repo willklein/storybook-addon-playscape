@@ -2,7 +2,7 @@
 
 A Storybook addon for forking a story, editing its source live against the real component, and sharing what you end up with via a URL.
 
-![](assets/Playscape-demo.mov)
+![](assets/demo.gif)
 
 ## What it does
 
