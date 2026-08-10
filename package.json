@@ -1,16 +1,16 @@
 {
-  "name": "storybook-addon-kit",
+  "name": "storybook-addon-playscape",
   "version": "0.0.0",
-  "description": "everything you need to build a Storybook addon",
+  "description": "A Storybook addon for locally editing, saving, and sharing stories",
   "keywords": [
     "storybook-addon"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/storybookjs/storybook-addon-kit"
+    "url": "https://github.com/willklein/storybook-addon-playscape"
   },
   "license": "MIT",
-  "author": "package-author",
+  "author": "Will Klein <will@willklein.co>",
   "type": "module",
   "exports": {
     ".": {
@@ -38,7 +38,6 @@
     "build-storybook": "storybook build",
     "build:watch": "npm run build -- --watch",
     "eject-ts": "zx scripts/eject-typescript.js",
-    "postinstall": "node scripts/welcome.js",
     "format": "prettier --write .",
     "lint": "eslint --cache .",
     "lint:fix": "pnpm lint --fix",
@@ -97,9 +96,9 @@
     ]
   },
   "storybook": {
-    "displayName": "Addon Kit",
+    "displayName": "Playscape",
     "supportedFrameworks": [
-      "supported-frameworks"
+      "React"
     ],
     "icon": "https://user-images.githubusercontent.com/321738/63501763-88dbf600-c4cc-11e9-96cd-94adadc2fd72.png"
   },
