@@ -62,6 +62,12 @@ export default defineConfig(async () => {
       platform: 'browser',
       target: 'esnext', // we can use esnext for preview entries since the builders will bundle the addon's preview entries again anyway
       dts: true,
+      // @babel/standalone is dynamically imported (lazy-loaded only when a fork is actually
+      // evaluated) and is CommonJS with no ESM entry. Consuming Vite setups don't reliably
+      // discover/pre-bundle that nested dynamic import of a CJS dep buried inside our own dist
+      // file, which can leave it resolving to an empty module at runtime. Force it fully inlined
+      // into our own chunk instead of depending on the consumer's bundler to handle it.
+      noExternal: ['@babel/standalone'],
     });
   }
 

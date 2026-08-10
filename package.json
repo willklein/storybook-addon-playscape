@@ -6,7 +6,9 @@
     "storybook-addon",
     "storybook-addons",
     "playground",
-    "sandbox"
+    "sandbox",
+    "playscape",
+    "code"
   ],
   "repository": {
     "type": "git",
