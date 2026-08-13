@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { useStorybookState } from 'storybook/manager-api';
+import { AddonPanel } from 'storybook/internal/components';
+import { useStorybookApi, useStorybookState } from 'storybook/manager-api';
 import { styled } from 'storybook/theming';
 
-import { SHARE_PARAM } from '../constants';
+import { PANEL_ID, SHARE_PARAM } from '../constants';
 import { createFork, deleteFork, getForksForStory, nextForkName, resolveUniqueName } from '../lib/storage';
 import { decodeShareToken, stripShareParam, type SharePayload } from '../lib/shareToken';
 import type { PlayscapeFork } from '../types';
@@ -10,7 +11,7 @@ import { ForkEditor } from './ForkEditor';
 import { ForkList } from './ForkList';
 import { ShareImportConfirm } from './ShareImportConfirm';
 
-interface PlayscapeTabProps {
+interface PlayscapePanelProps {
   active?: boolean;
 }
 
@@ -23,7 +24,8 @@ const Wrapper = styled.div(({ theme }) => ({
   boxSizing: 'border-box',
 }));
 
-export const PlayscapeTab: React.FC<PlayscapeTabProps> = ({ active }) => {
+export const PlayscapePanel: React.FC<PlayscapePanelProps> = ({ active }) => {
+  const api = useStorybookApi();
   const { storyId } = useStorybookState();
   const [forks, setForks] = useState<PlayscapeFork[]>([]);
   const [view, setView] = useState<View>({ type: 'list' });
@@ -43,6 +45,12 @@ export const PlayscapeTab: React.FC<PlayscapeTabProps> = ({ active }) => {
       // param afterwards, so don't rely on it staying gone. The `id` reuse below is what
       // actually keeps re-processing the same token idempotent.
       stripShareParam(SHARE_PARAM);
+
+      // Unlike tabs, a panel's selection isn't part of the URL (Storybook keeps it in
+      // sessionStorage instead), so a share link can't rely on `?panel=` to land here — force
+      // it explicitly so the confirmation prompt (and the fork afterwards) is actually visible
+      // instead of sitting behind whichever panel the recipient last had open.
+      api.setSelectedPanel(PANEL_ID);
 
       if (payload) {
         const existing = getForksForStory(storyId).find((fork) => fork.id === payload.id);
@@ -120,8 +128,6 @@ export const PlayscapeTab: React.FC<PlayscapeTabProps> = ({ active }) => {
     setPendingShare(null);
   }, []);
 
-  if (!active || !storyId) return null;
-
   const confirmModal = pendingShare ? (
     <ShareImportConfirm
       name={pendingShare.name}
@@ -131,34 +137,29 @@ export const PlayscapeTab: React.FC<PlayscapeTabProps> = ({ active }) => {
     />
   ) : null;
 
-  if (view.type === 'list') {
-    return (
+  return (
+    <AddonPanel active={active ?? false}>
       <Wrapper>
-        <ForkList
-          forks={forks}
-          onOpenDefault={() => setView({ type: 'default' })}
-          onOpenFork={(forkId) => setView({ type: 'fork', forkId })}
-          onNewFork={handleNewFork}
-          onDelete={handleDelete}
-        />
+        {!storyId ? null : view.type === 'list' ? (
+          <ForkList
+            forks={forks}
+            onOpenDefault={() => setView({ type: 'default' })}
+            onOpenFork={(forkId) => setView({ type: 'fork', forkId })}
+            onNewFork={handleNewFork}
+            onDelete={handleDelete}
+          />
+        ) : (
+          <ForkEditor
+            key={view.type === 'fork' ? view.forkId : 'default'}
+            storyId={storyId}
+            fork={view.type === 'fork' ? (forks.find((f) => f.id === view.forkId) ?? null) : null}
+            onBack={() => setView({ type: 'list' })}
+            onCreated={handleDefaultCreated}
+            onUpdated={refresh}
+          />
+        )}
         {confirmModal}
       </Wrapper>
-    );
-  }
-
-  const fork = view.type === 'fork' ? (forks.find((f) => f.id === view.forkId) ?? null) : null;
-
-  return (
-    <Wrapper>
-      <ForkEditor
-        key={view.type === 'fork' ? view.forkId : 'default'}
-        storyId={storyId}
-        fork={fork}
-        onBack={() => setView({ type: 'list' })}
-        onCreated={handleDefaultCreated}
-        onUpdated={refresh}
-      />
-      {confirmModal}
-    </Wrapper>
+    </AddonPanel>
   );
 };

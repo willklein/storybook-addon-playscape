@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { IconButton } from 'storybook/internal/components';
 import { styled } from 'storybook/theming';
 
-import { DEFAULT_FORK_NAME, EVENTS, SHARE_PARAM, TAB_ID } from '../constants';
+import { DEFAULT_FORK_NAME, EVENTS, SHARE_PARAM } from '../constants';
 import { listenFromFrame, postToFrame } from '../lib/directChannel';
 import { encodeShareToken } from '../lib/shareToken';
 import { createFork, updateFork } from '../lib/storage';
@@ -17,7 +17,7 @@ interface ForkEditorProps {
   onUpdated: () => void;
 }
 
-const DEFAULT_PREVIEW_HEIGHT = 280;
+const DEFAULT_PREVIEW_HEIGHT = 180; // panels default to less vertical space than a full tab did
 const MIN_PREVIEW_HEIGHT = 80;
 const MIN_EDITOR_HEIGHT = 100;
 const DIVIDER_HEIGHT = 7;
@@ -240,7 +240,8 @@ export const ForkEditor: React.FC<ForkEditorProps> = ({ storyId, fork, onBack, o
     if (!created) return;
     const token = encodeShareToken({ id: created.id, name: name.trim() || DEFAULT_FORK_NAME, source });
     const url = new URL(window.location.href);
-    url.searchParams.set('tab', TAB_ID);
+    // Panel selection isn't part of the URL in Storybook (see PlayscapePanel's use of
+    // api.setSelectedPanel), so there's no query param that would help here.
     url.searchParams.set(SHARE_PARAM, token);
 
     try {
