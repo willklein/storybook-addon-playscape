@@ -128,7 +128,7 @@ describe('a user who already has a default fork', () => {
       />,
     );
 
-    await user.click(screen.getByTitle('Delete fork'));
+    await user.click(screen.getByRole('button', { name: 'Delete fork' }));
 
     expect(onDelete).toHaveBeenCalledWith('default');
   });
@@ -146,7 +146,7 @@ describe('a user who already has a default fork', () => {
       />,
     );
 
-    await user.click(screen.getByTitle('Delete fork'));
+    await user.click(screen.getByRole('button', { name: 'Delete fork' }));
 
     expect(onOpenFork).not.toHaveBeenCalled();
   });

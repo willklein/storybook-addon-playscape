@@ -21,14 +21,14 @@ describe('a user who opens a shared Playscape link for the first time', () => {
     expect(screen.getByText(/reading cookies and other data on this site/i)).toBeInTheDocument();
   });
 
-  it('sees the exact, unencoded source that would run — not a summary of it', () => {
+  it('sees the full unencoded source that would run', () => {
     const source = '<Button\n  primary\n  label="Click me"\n/>';
     renderWithTheme(<ShareImportConfirm name="Fork" source={source} onConfirm={vi.fn()} onCancel={vi.fn()} />);
 
     expect(screen.getByText((_, node) => node?.textContent === source)).toBeInTheDocument();
   });
 
-  it('has not had any code run yet — nothing happens until they choose', () => {
+  it('does not execute the code until it is explicitly confirmed', () => {
     const onConfirm = vi.fn();
     renderWithTheme(<ShareImportConfirm name="Fork" source="<Button />" onConfirm={onConfirm} onCancel={vi.fn()} />);
 
@@ -37,7 +37,7 @@ describe('a user who opens a shared Playscape link for the first time', () => {
 });
 
 describe('a user who decides not to trust the link', () => {
-  it('can back out without the code ever being confirmed', async () => {
+  it('can back out without the code being executed', async () => {
     const user = userEvent.setup();
     const onConfirm = vi.fn();
     const onCancel = vi.fn();

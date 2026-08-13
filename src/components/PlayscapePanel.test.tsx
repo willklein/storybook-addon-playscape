@@ -94,7 +94,7 @@ describe('a user who follows a Playscape share link for the first time', () => {
 });
 
 describe('a user re-visiting a share link they already trusted before', () => {
-  it('is not asked to confirm again', () => {
+  it('is not asked to confirm again', async () => {
     const token = encodeShareToken({ id: 'already-trusted', name: 'Trusted Fork', source: '<Button />' });
 
     // First visit: land on the panel with nothing imported yet, matching how the real fork would
@@ -118,5 +118,9 @@ describe('a user re-visiting a share link they already trusted before', () => {
     renderWithTheme(<PlayscapePanel active />);
 
     expect(screen.queryByText(/reading cookies and other data on this site/i)).not.toBeInTheDocument();
+    await waitFor(() => {
+      const forks = JSON.parse(localStorage.getItem('storybook-addon-playscape:forks') ?? '[]');
+      expect(forks).toHaveLength(1);
+    });
   });
 });

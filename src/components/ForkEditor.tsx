@@ -1,6 +1,6 @@
 import { BackIcon, CheckIcon, RefreshIcon, ShareIcon } from '@storybook/icons';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { IconButton } from 'storybook/internal/components';
+import { Button } from 'storybook/internal/components';
 import { styled } from 'storybook/theming';
 
 import { DEFAULT_FORK_NAME, EVENTS, SHARE_PARAM } from '../constants';
@@ -257,12 +257,12 @@ export const ForkEditor: React.FC<ForkEditorProps> = ({ storyId, fork, onBack, o
   return (
     <Wrapper>
       <Toolbar>
-        <IconButton onClick={onBack} title="Back to forks">
+        <Button onClick={onBack} ariaLabel="Back to forks">
           <BackIcon />
-        </IconButton>
-        <IconButton onClick={handleReload} title="Reload preview" disabled={!created}>
+        </Button>
+        <Button onClick={handleReload} ariaLabel="Reload preview" disabled={!created}>
           <RefreshIcon />
-        </IconButton>
+        </Button>
         <NameInput
           value={name}
           onChange={(event) => setName(event.target.value)}
@@ -275,9 +275,9 @@ export const ForkEditor: React.FC<ForkEditorProps> = ({ storyId, fork, onBack, o
             Created {formatDate(created.createdAt)} · Edited {formatDate(created.updatedAt)}
           </Dates>
         ) : null}
-        <IconButton onClick={handleShare} title="Copy shareable link" disabled={!created}>
+        <Button onClick={handleShare} ariaLabel="Copy shareable link" disabled={!created}>
           {shared ? <CheckIcon /> : <ShareIcon />}
-        </IconButton>
+        </Button>
       </Toolbar>
 
       <Content ref={contentRef}>

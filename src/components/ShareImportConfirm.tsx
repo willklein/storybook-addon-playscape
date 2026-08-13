@@ -87,8 +87,12 @@ export const ShareImportConfirm: React.FC<ShareImportConfirmProps> = ({ name, so
       <SourceLabel>Code that will run, exactly as written:</SourceLabel>
       <SourceBlock>{source}</SourceBlock>
       <Actions>
-        <Button onClick={onCancel}>Cancel</Button>
-        <Button onClick={onConfirm}>Load and run this code</Button>
+        <Button onClick={onCancel} ariaLabel={false}>
+          Cancel
+        </Button>
+        <Button onClick={onConfirm} ariaLabel={false}>
+          Load and run this code
+        </Button>
       </Actions>
     </Body>
   </Modal>
