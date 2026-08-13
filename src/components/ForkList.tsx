@@ -1,6 +1,6 @@
 import { BranchIcon, PlusIcon, TrashIcon } from '@storybook/icons';
 import React from 'react';
-import { Button, IconButton } from 'storybook/internal/components';
+import { Button } from 'storybook/internal/components';
 import { styled } from 'storybook/theming';
 
 import { DEFAULT_FORK_NAME } from '../constants';
@@ -73,7 +73,7 @@ export const ForkList: React.FC<ForkListProps> = ({ forks, onOpenDefault, onOpen
     <div>
       <Header>
         <Title>Playscape forks</Title>
-        <Button disabled={!hasDefault} onClick={onNewFork}>
+        <Button disabled={!hasDefault} onClick={onNewFork} ariaLabel={false}>
           <PlusIcon /> New fork
         </Button>
       </Header>
@@ -94,15 +94,15 @@ export const ForkList: React.FC<ForkListProps> = ({ forks, onOpenDefault, onOpen
           </Name>
           <Meta>Created {formatDate(fork.createdAt)}</Meta>
           <Meta>Edited {formatDate(fork.updatedAt)}</Meta>
-          <IconButton
-            title="Delete fork"
+          <Button
+            ariaLabel="Delete fork"
             onClick={(event) => {
               event.stopPropagation();
               onDelete(fork.id);
             }}
           >
             <TrashIcon />
-          </IconButton>
+          </Button>
         </Row>
       ))}
     </div>
