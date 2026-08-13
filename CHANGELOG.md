@@ -1,3 +1,16 @@
+# v1.0.4 (Thu Aug 13 2026)
+
+#### ⚠️ Pushed to `main`
+
+- Merge branch 'ui-rework' ([@willklein](https://github.com/willklein))
+- Migrate from types.TAB to types.PANEL ([@willklein](https://github.com/willklein))
+
+#### Authors: 1
+
+- Will Klein ([@willklein](https://github.com/willklein))
+
+---
+
 # v1.0.3 (Thu Aug 13 2026)
 
 #### ⚠️ Pushed to `main`
