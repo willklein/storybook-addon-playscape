@@ -4,10 +4,11 @@ import { styled } from 'storybook/theming';
 
 import { SHARE_PARAM } from '../constants';
 import { createFork, deleteFork, getForksForStory, nextForkName, resolveUniqueName } from '../lib/storage';
-import { decodeShareToken, stripShareParam } from '../lib/shareToken';
+import { decodeShareToken, stripShareParam, type SharePayload } from '../lib/shareToken';
 import type { PlayscapeFork } from '../types';
 import { ForkEditor } from './ForkEditor';
 import { ForkList } from './ForkList';
+import { ShareImportConfirm } from './ShareImportConfirm';
 
 interface PlayscapeTabProps {
   active?: boolean;
@@ -26,6 +27,7 @@ export const PlayscapeTab: React.FC<PlayscapeTabProps> = ({ active }) => {
   const { storyId } = useStorybookState();
   const [forks, setForks] = useState<PlayscapeFork[]>([]);
   const [view, setView] = useState<View>({ type: 'list' });
+  const [pendingShare, setPendingShare] = useState<SharePayload | null>(null);
 
   useEffect(() => {
     if (!storyId) {
@@ -44,17 +46,19 @@ export const PlayscapeTab: React.FC<PlayscapeTabProps> = ({ active }) => {
 
       if (payload) {
         const existing = getForksForStory(storyId).find((fork) => fork.id === payload.id);
-        const target =
-          existing ??
-          createFork({
-            id: payload.id,
-            storyId,
-            name: resolveUniqueName(storyId, payload.name),
-            source: payload.source,
-            isDefault: false,
-          });
+        if (existing) {
+          // Already imported (and implicitly trusted) in a prior visit — nothing new to run,
+          // so no need to prompt again. Just go back to it.
+          setForks(getForksForStory(storyId));
+          setView({ type: 'fork', forkId: existing.id });
+          return;
+        }
+
+        // A fresh, never-seen-before share token: this is arbitrary code from a URL, so it
+        // does not get evaluated until the user has reviewed and explicitly confirmed it.
         setForks(getForksForStory(storyId));
-        setView({ type: 'fork', forkId: target.id });
+        setView({ type: 'list' });
+        setPendingShare(payload);
         return;
       }
     }
@@ -98,7 +102,34 @@ export const PlayscapeTab: React.FC<PlayscapeTabProps> = ({ active }) => {
     [refresh],
   );
 
+  const handleConfirmShare = useCallback(() => {
+    if (!storyId || !pendingShare) return;
+    const created = createFork({
+      id: pendingShare.id,
+      storyId,
+      name: resolveUniqueName(storyId, pendingShare.name),
+      source: pendingShare.source,
+      isDefault: false,
+    });
+    setPendingShare(null);
+    setForks(getForksForStory(storyId));
+    setView({ type: 'fork', forkId: created.id });
+  }, [pendingShare, storyId]);
+
+  const handleCancelShare = useCallback(() => {
+    setPendingShare(null);
+  }, []);
+
   if (!active || !storyId) return null;
+
+  const confirmModal = pendingShare ? (
+    <ShareImportConfirm
+      name={pendingShare.name}
+      source={pendingShare.source}
+      onConfirm={handleConfirmShare}
+      onCancel={handleCancelShare}
+    />
+  ) : null;
 
   if (view.type === 'list') {
     return (
@@ -110,6 +141,7 @@ export const PlayscapeTab: React.FC<PlayscapeTabProps> = ({ active }) => {
           onNewFork={handleNewFork}
           onDelete={handleDelete}
         />
+        {confirmModal}
       </Wrapper>
     );
   }
@@ -126,6 +158,7 @@ export const PlayscapeTab: React.FC<PlayscapeTabProps> = ({ active }) => {
         onCreated={handleDefaultCreated}
         onUpdated={refresh}
       />
+      {confirmModal}
     </Wrapper>
   );
 };
