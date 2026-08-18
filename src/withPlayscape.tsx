@@ -13,6 +13,15 @@ interface OverrideState {
   source: string;
 }
 
+function buildStoryReadyPayload(context: StoryContext) {
+  const componentName = getComponentName(context.component);
+  return {
+    storyId: context.id,
+    componentName,
+    source: argsToSource(componentName, context.args ?? {}),
+  };
+}
+
 export const withPlayscape: DecoratorFunction = (StoryFn: StoryFunction, context: StoryContext) => {
   const [override, setOverride] = useState<OverrideState | null>(null);
   const [rendered, setRendered] = useState<React.ReactElement | null>(null);
@@ -23,15 +32,22 @@ export const withPlayscape: DecoratorFunction = (StoryFn: StoryFunction, context
       if (payload.storyId !== context.id) return;
       setOverride({ forkId: payload.forkId, source: payload.source });
     },
+    [EVENTS.CLEAR_SOURCE]: (payload: { storyId: string }) => {
+      if (payload.storyId !== context.id) return;
+      setOverride(null);
+    },
+    [EVENTS.REQUEST_STORY_READY]: (payload: { storyId: string }) => {
+      if (payload.storyId !== context.id) return;
+      emit(EVENTS.STORY_READY, buildStoryReadyPayload(context));
+    },
   });
 
   useEffect(() => {
+    // Only useful as a first-mover beacon for a panel that's already mounted and listening by
+    // the time this fires — REQUEST_STORY_READY above is what actually makes this reliable,
+    // since the Canvas has usually already rendered once before a fork editor opens.
     if (override) return;
-    emit(EVENTS.STORY_READY, {
-      storyId: context.id,
-      componentName: getComponentName(context.component),
-      source: argsToSource(getComponentName(context.component), context.args ?? {}),
-    });
+    emit(EVENTS.STORY_READY, buildStoryReadyPayload(context));
   }, [override, context.id, context.args]);
 
   useEffect(() => {
