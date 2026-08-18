@@ -10,10 +10,15 @@ import { PlayscapePanel } from './PlayscapePanel';
 const STORY_ID = 'components-button--primary';
 
 const setSelectedPanel = vi.fn();
+const emit = vi.fn();
 
 vi.mock('storybook/manager-api', () => ({
   useStorybookState: () => ({ storyId: STORY_ID }),
   useStorybookApi: () => ({ setSelectedPanel }),
+  // ForkEditor talks to the real Canvas over the standard channel now (no more embedded iframe
+  // of its own) — these tests only exercise the localStorage-driven confirm/cancel flow, not
+  // that request/response handshake, so a no-op emit that doesn't crash is enough here.
+  useChannel: () => emit,
 }));
 
 function setUrl(search: string) {
