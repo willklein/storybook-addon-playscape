@@ -1,3 +1,20 @@
+# v1.0.5 (Tue Aug 18 2026)
+
+#### 🐛 Bug Fix
+
+- Render Playscape forks in the Storybook Canvas [#3](https://github.com/willklein/storybook-addon-playscape/pull/3) ([@willklein](https://github.com/willklein))
+
+#### ⚠️ Pushed to `main`
+
+- Merge branch 'main' of github.com:willklein/storybook-addon-playscape ([@willklein](https://github.com/willklein))
+- Fix release issue with failed git operation ([@willklein](https://github.com/willklein))
+
+#### Authors: 1
+
+- Will Klein ([@willklein](https://github.com/willklein))
+
+---
+
 # v1.0.4 (Thu Aug 13 2026)
 
 #### ⚠️ Pushed to `main`
