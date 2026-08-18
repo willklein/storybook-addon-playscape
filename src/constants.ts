@@ -11,6 +11,12 @@ export const SHARE_PARAM = 'loadPlayscape';
 export const EVENTS = {
   // manager -> preview: override the story's render with the given source
   SET_SOURCE: `${ADDON_ID}/set-source`,
+  // manager -> preview: stop overriding and go back to the story's normal args-driven render
+  CLEAR_SOURCE: `${ADDON_ID}/clear-source`,
+  // manager -> preview: "what would a fresh fork's starting source look like right now?" — used
+  // instead of passively waiting for STORY_READY, since the Canvas is usually already rendering
+  // by the time a fork editor opens, so a beacon-only approach would miss it.
+  REQUEST_STORY_READY: `${ADDON_ID}/request-story-ready`,
   // preview -> manager: the unforked story rendered normally; here's a starting point for a new fork
   STORY_READY: `${ADDON_ID}/story-ready`,
   // preview -> manager: result of evaluating an overridden source
